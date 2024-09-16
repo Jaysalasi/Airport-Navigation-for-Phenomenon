@@ -41,6 +41,13 @@ dependencies:
   syncfusion_flutter_datepicker: ^26.2.13
   modal_bottom_sheet: ^3.0.0
   animate_do: ^3.3.4
+  google_maps_flutter: ^2.9.0
+  http: ^1.2.2
+  geolocator: ^13.0.1
+  provider: ^6.1.2
+  flutter_polyline_points: ^2.1.0
+  location: ^6.0.2
+  
 
 dev_dependencies:
   flutter_test:

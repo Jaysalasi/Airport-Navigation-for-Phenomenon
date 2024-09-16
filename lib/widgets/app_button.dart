@@ -7,7 +7,13 @@ class AppButton extends StatelessWidget {
   final Function()? onTap;
   final String text;
   final Color? color;
-  const AppButton({super.key, this.onTap, required this.text, this.color});
+  final bool isIcon;
+  const AppButton(
+      {super.key,
+      this.onTap,
+      required this.text,
+      this.color,
+      this.isIcon = true});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +41,12 @@ class AppButton extends StatelessWidget {
               const SizedBox(
                 width: 10,
               ),
-              const AppIcon(
-                icon: Icons.arrow_outward_rounded,
-                color: Colors.black,
-                size: 18,
-              ),
+              if (isIcon)
+                const AppIcon(
+                  icon: Icons.arrow_outward_rounded,
+                  color: Colors.black,
+                  size: 18,
+                ),
             ],
           ),
         ),

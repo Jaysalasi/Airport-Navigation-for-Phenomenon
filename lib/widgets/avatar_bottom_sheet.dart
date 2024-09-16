@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:car_rent/widgets/app_button.dart';
 import 'package:car_rent/widgets/app_icon.dart';
 import 'package:car_rent/widgets/app_text.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart'
     as modal_bottom_sheet;
 
-class AvatarBottomSheet extends StatelessWidget {
+class AvatarBottomSheet extends StatefulWidget {
   final Function()? onCancel;
   final Function()? onTap;
   final Widget child;
@@ -29,9 +30,14 @@ class AvatarBottomSheet extends StatelessWidget {
       required this.isEndDate});
 
   @override
+  State<AvatarBottomSheet> createState() => _AvatarBottomSheetState();
+}
+
+class _AvatarBottomSheetState extends State<AvatarBottomSheet> {
+  @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle ?? SystemUiOverlayStyle.light,
+      value: widget.overlayStyle ?? SystemUiOverlayStyle.light,
       child: Scaffold(
         body: Column(
           mainAxisSize: MainAxisSize.min,
@@ -41,11 +47,11 @@ class AvatarBottomSheet extends StatelessWidget {
             SafeArea(
               bottom: false,
               child: AnimatedBuilder(
-                animation: animation,
+                animation: widget.animation,
                 builder: (context, child) => Transform.translate(
-                  offset: Offset(0, (1 - animation.value) * 100),
+                  offset: Offset(0, (1 - widget.animation.value) * 100),
                   child: Opacity(
-                    opacity: max(0, animation.value * 2 - 1),
+                    opacity: max(0, widget.animation.value * 2 - 1),
                     child: child,
                   ),
                 ),
@@ -78,7 +84,7 @@ class AvatarBottomSheet extends StatelessWidget {
                           icon: Icons.close_rounded,
                           onTap: () {
                             // if (onCancel != null) {
-                            onCancel!();
+                            widget.onCancel!();
                             // }
                             Navigator.pop(context);
                             // print('cancel');
@@ -120,7 +126,18 @@ class AvatarBottomSheet extends StatelessWidget {
                     child: Stack(
                       children: [
                         // The child widget you pass should be used here
-                        child,
+                        widget.child,
+                        if (widget.isEndDate)
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: AppButton(
+                              text: widget.text!,
+                              onTap: () {},
+                            ).paddingSymmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                          )
                       ],
                     ),
                   ),
