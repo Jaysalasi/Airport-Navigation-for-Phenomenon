@@ -5,6 +5,7 @@ import 'package:car_rent/app_info/app_info.dart';
 import 'package:car_rent/constants/constants.dart';
 import 'package:car_rent/methods/google_maps_method.dart';
 import 'package:car_rent/screens/destination_page.dart';
+import 'package:car_rent/widgets/app_button.dart';
 import 'package:car_rent/widgets/app_icon.dart';
 import 'package:car_rent/widgets/app_text.dart';
 import 'package:flutter/material.dart';
@@ -373,15 +374,15 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                 bottom: context.height * 0.1,
                 child: FadeIn(
                   child: Container(
+                    width: context.width,
                     margin: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
-                    padding: const EdgeInsets.symmetric(
                         vertical: 20, horizontal: 20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Row(
+                      // mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Column(
@@ -397,64 +398,77 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                             //     color: Colors.black.withOpacity(0.2),
                             //   ),
                             // ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                // const AppText(
-                                //   text: 'B. Destination',
-                                //   color: Colors.black,
-                                //   isBold: true,
-                                //   fontSize: 14,
-                                // ),
-                                SizedBox(
-                                  width: context.width * 0.6,
-                                  child: AppText(
-                                    text: destinationAddress,
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                    isBold: true,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: 20),
+                              // padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 5,
                                   ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(5),
+                                  // const AppText(
+                                  //   text: 'B. Destination',
+                                  //   color: Colors.black,
+                                  //   isBold: true,
+                                  //   fontSize: 14,
+                                  // ),
+                                  SizedBox(
+                                    width: context.width * 0.6,
+                                    child: AppText(
+                                      text: destinationAddress,
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                      isBold: true,
+                                    ),
                                   ),
-                                  width: context.width * 0.6,
-                                  child: Row(
-                                    children: [
-                                      const AppIcon(
-                                        icon: Icons.route_rounded,
-                                        size: 14,
-                                        color: Colors.black,
-                                      ),
-                                      AppText(
-                                        text: distanceKm.toString(),
-                                        color: Colors.black,
-                                        fontSize: 14,
-                                        isBold: true,
-                                      ),
-                                    ],
+                                  Container(
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    width: context.width * 0.6,
+                                    child: Row(
+                                      children: [
+                                        const AppIcon(
+                                          icon: Icons.route_rounded,
+                                          size: 14,
+                                          color: Colors.black,
+                                        ),
+                                        AppText(
+                                          text: distanceKm.toString(),
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          isBold: true,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(
+                              width: context.width * 0.9,
+                              child: AppButton(
+                                text: 'Let\'s go',
+                                onTap: () {},
+                              ),
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                              color: Colors.black, shape: BoxShape.circle),
-                          child: const AppIcon(
-                            icon: Icons.swap_vert_rounded,
-                            color: Colors.white,
-                            size: 20.0,
-                          ),
-                        )
+                        // Container(
+                        //   padding: const EdgeInsets.all(3),
+                        //   decoration: const BoxDecoration(
+                        //       color: Colors.black, shape: BoxShape.circle),
+                        //   child: const AppIcon(
+                        //     icon: Icons.swap_vert_rounded,
+                        //     color: Colors.white,
+                        //     size: 20.0,
+                        //   ),
+                        // )
                       ],
                     ),
                   ),
