@@ -28,6 +28,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   late double long = 0;
   double desLat = 8.996140076758163;
   double desLong = 7.584372460842132;
+  double distanceKm = 0;
+  double currentZoom = 15.0;
   String destinationAddress = '';
   // Position? currentUserPosition;
   Set<Marker> markers = {};
@@ -70,11 +72,14 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
               'destination',
               // ignore: use_build_context_synchronously
               context);
+
+      final distKm =
+          await GoogleMapsMethods.getDistance(lat, long, desLat, desLong);
       setState(() {
         destinationAddress = destAddress;
-        // desLat = e.latitude!;
-        // desLong = e.longitude!;
+        distanceKm = distKm;
       });
+
       setState(() {});
     });
   }
@@ -180,6 +185,26 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
     );
   }
 
+  // Function to zoom in
+  Future<void> zoomIn() async {
+    final GoogleMapController controller =
+        await googleMapCompleterController.future;
+    setState(() {
+      currentZoom += 1; // Increase the zoom level
+    });
+    controller.animateCamera(CameraUpdate.zoomTo(currentZoom));
+  }
+
+  // Function to zoom out
+  Future<void> zoomOut() async {
+    final GoogleMapController controller =
+        await googleMapCompleterController.future;
+    setState(() {
+      currentZoom -= 1; // Decrease the zoom level
+    });
+    controller.animateCamera(CameraUpdate.zoomTo(currentZoom));
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('init lats lngs $lat $long $destinationAddress');
@@ -198,6 +223,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                         width: 3,
                       ),
                     },
+                    zoomControlsEnabled: false,
                     trafficEnabled: true,
                     padding: EdgeInsets.only(top: 20, bottom: bottomMapPadding),
                     mapType: MapType.normal,
@@ -339,113 +365,150 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                 ),
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              // top: 0,
-              bottom: context.height * 0.1,
-              child: FadeIn(
-                child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const AppText(
-                                text: 'A. Your location',
-                                color: Colors.black,
-                                isBold: true,
-                                fontSize: 14,
-                              ),
-                              SizedBox(
-                                width: context.width * 0.6,
-                                child: AppText(
-                                  text:
-                                      '${Provider.of<AppInfo>(context, listen: true).pickupLocation == null ? 'Loading...' : Provider.of<AppInfo>(context, listen: false).pickupLocation?.placeName}',
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                            height: 1,
-                            width: context.width * 0.6,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Get.to(() => const DestinationPage());
-                            },
-                            child: Column(
+            if (destinationAddress != '')
+              Positioned(
+                left: 0,
+                right: 0,
+                // top: 0,
+                bottom: context.height * 0.1,
+                child: FadeIn(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // const SizedBox(
+                            //   height: 5,
+                            // ),
+                            // Container(
+                            //   height: 1,
+                            //   width: context.width * 0.6,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.black.withOpacity(0.2),
+                            //   ),
+                            // ),
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                const AppText(
-                                  text: 'B. Destination',
-                                  color: Colors.black,
-                                  isBold: true,
-                                  fontSize: 14,
-                                ),
+                                // const AppText(
+                                //   text: 'B. Destination',
+                                //   color: Colors.black,
+                                //   isBold: true,
+                                //   fontSize: 14,
+                                // ),
                                 SizedBox(
                                   width: context.width * 0.6,
                                   child: AppText(
                                     text: destinationAddress,
                                     color: Colors.black,
+                                    fontSize: 14,
+                                    isBold: true,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  width: context.width * 0.6,
+                                  child: Row(
+                                    children: [
+                                      const AppIcon(
+                                        icon: Icons.route_rounded,
+                                        size: 14,
+                                        color: Colors.black,
+                                      ),
+                                      AppText(
+                                        text: distanceKm.toString(),
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                        isBold: true,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                            color: Colors.black, shape: BoxShape.circle),
-                        child: const AppIcon(
-                          icon: Icons.swap_vert_rounded,
-                          color: Colors.white,
-                          size: 20.0,
+                          ],
                         ),
-                      )
-                    ],
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                              color: Colors.black, shape: BoxShape.circle),
+                          child: const AppIcon(
+                            icon: Icons.swap_vert_rounded,
+                            color: Colors.white,
+                            size: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
             Positioned(
-              bottom: context.height * 0.15,
+              bottom: context.height * 0.4,
               right: 12,
               // left: 0,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6)),
-                child: AppIcon(
-                  icon: Icons.my_location_rounded,
-                  color: Colors.black,
-                  onTap: goToMyLocation,
-                ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6)),
+                    child: AppIcon(
+                      icon: Icons.my_location_rounded,
+                      color: Colors.black,
+                      onTap: goToMyLocation,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6)),
+                    child: AppIcon(
+                      icon: Icons.add,
+                      color: Colors.black,
+                      onTap: zoomIn,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6)),
+                    child: AppIcon(
+                      icon: Icons.remove,
+                      color: Colors.black,
+                      onTap: zoomOut,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                ],
               ),
             ),
           ],
