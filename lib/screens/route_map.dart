@@ -93,7 +93,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       mapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            zoom: 13.5,
+            zoom: 15,
             target: LatLng(
               e.latitude!,
               e.longitude!,
@@ -155,6 +155,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   }
 
   void setCustomMarker() {
+    // ignore: deprecated_member_use
     BitmapDescriptor.fromAssetImage(
             ImageConfiguration.empty, 'assets/car-icon.png')
         .then((icon) {
@@ -162,9 +163,26 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
     });
   }
 
+  Future<void> goToMyLocation() async {
+    final GoogleMapController controller =
+        await googleMapCompleterController.future;
+    // Assuming you've already implemented logic to get the user's current location
+    // Here, hardcoded to a specific LatLng for demo purposes
+    LatLng currentLocation = LatLng(lat, long);
+
+    controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: currentLocation,
+          zoom: 15,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    print('init lats lngs $lat $long $destinationAddress');
+    // print('init lats lngs $lat $long $destinationAddress');
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -180,52 +198,31 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                         width: 3,
                       ),
                     },
+                    trafficEnabled: true,
                     padding: EdgeInsets.only(top: 20, bottom: bottomMapPadding),
                     mapType: MapType.normal,
                     myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    initialCameraPosition:
-                        CameraPosition(target: LatLng(lat, long), zoom: 15),
+                    myLocationButtonEnabled: false,
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(lat, long),
+                    ),
                     onMapCreated: (GoogleMapController googleMapController) {
                       controllerGoogleMap = googleMapController;
                       googleMapCompleterController
                           .complete(controllerGoogleMap);
-                      // determinePosition();
                     },
-                    // markers: Set<Marker>.of(markers), // Make sure markers is a Set
                     markers: {
-                      // Marker(
-                      //   // markerId: MarkerId(tappedPoint.toString()),
-                      //   markerId: const MarkerId('movementLocation'),
-                      //   icon: movementIcon,
-                      //   position: LatLng(
-                      //       currentLocation!.latitude!, currentLocation!.longitude!),
-                      //   infoWindow: const InfoWindow(
-                      //       // title: "Selected Location",
-                      //       // snippet:
-                      //       //     "Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}",
-                      //       ),
-                      // ),
                       Marker(
-                        // markerId: MarkerId(tappedPoint.toString()),
                         markerId: const MarkerId('movementLocation'),
                         icon: movementIcon,
                         position: LatLng(currentLocation!.latitude!,
                             currentLocation!.longitude!),
-                        infoWindow: const InfoWindow(
-                            // title: "Selected Location",
-                            // snippet:
-                            //     "Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}",
-                            ),
+                        infoWindow: const InfoWindow(),
                       ),
                       Marker(
                         markerId: const MarkerId('Source'),
                         position: LatLng(lat, long),
-                        infoWindow: const InfoWindow(
-                            // title: "Selected Location",
-                            // snippet:
-                            //     "Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}",
-                            ),
+                        infoWindow: const InfoWindow(),
                       ),
                       Marker(
                         // markerId: MarkerId(tappedPoint.toString()),
@@ -233,8 +230,6 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                         position: LatLng(desLat, desLong),
                         infoWindow: InfoWindow(
                           title: destinationAddress,
-                          // snippet:
-                          //     "Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}",
                         ),
                       ),
                     }, // Make sure markers is a Set
@@ -243,22 +238,10 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                         () {
                           desLat = tappedPoint.latitude;
                           desLong = tappedPoint.longitude;
-                          print('$desLat $desLong');
+                          // print('$desLat $desLong');
                           markers.clear(); // Clear previous markers if needed
                           updateDestination();
                           getPolyPoints();
-                          // markers.add(
-                          //   // Marker(
-                          //   //   // markerId: MarkerId(tappedPoint.toString()),
-                          //   //   markerId: MarkerId('Source'),
-                          //   //   position: tappedPoint,
-                          //   //   infoWindow: InfoWindow(
-                          //   //     title: "Selected Location",
-                          //   //     snippet:
-                          //   //         "Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}",
-                          //   //   ),
-                          //   // ),
-                          // );
                         },
                       );
                     },
@@ -288,7 +271,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const AppText(
-                                text: 'Start point',
+                                text: 'A. Your location',
                                 color: Colors.black,
                                 isBold: true,
                                 fontSize: 14,
@@ -303,6 +286,16 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Container(
+                            height: 1,
+                            width: context.width * 0.6,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.2),
+                            ),
+                          ),
                           GestureDetector(
                             onTap: () {
                               Get.to(() => const DestinationPage());
@@ -314,7 +307,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                   height: 5,
                                 ),
                                 const AppText(
-                                  text: 'Destination',
+                                  text: 'B. Destination',
                                   color: Colors.black,
                                   isBold: true,
                                   fontSize: 14,
@@ -343,6 +336,115 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                       )
                     ],
                   ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              // top: 0,
+              bottom: context.height * 0.1,
+              child: FadeIn(
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const AppText(
+                                text: 'A. Your location',
+                                color: Colors.black,
+                                isBold: true,
+                                fontSize: 14,
+                              ),
+                              SizedBox(
+                                width: context.width * 0.6,
+                                child: AppText(
+                                  text:
+                                      '${Provider.of<AppInfo>(context, listen: true).pickupLocation == null ? 'Loading...' : Provider.of<AppInfo>(context, listen: false).pickupLocation?.placeName}',
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Container(
+                            height: 1,
+                            width: context.width * 0.6,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.2),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(() => const DestinationPage());
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                const AppText(
+                                  text: 'B. Destination',
+                                  color: Colors.black,
+                                  isBold: true,
+                                  fontSize: 14,
+                                ),
+                                SizedBox(
+                                  width: context.width * 0.6,
+                                  child: AppText(
+                                    text: destinationAddress,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                            color: Colors.black, shape: BoxShape.circle),
+                        child: const AppIcon(
+                          icon: Icons.swap_vert_rounded,
+                          color: Colors.white,
+                          size: 20.0,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: context.height * 0.15,
+              right: 12,
+              // left: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6)),
+                child: AppIcon(
+                  icon: Icons.my_location_rounded,
+                  color: Colors.black,
+                  onTap: goToMyLocation,
                 ),
               ),
             ),

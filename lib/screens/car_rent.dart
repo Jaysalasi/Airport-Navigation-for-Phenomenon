@@ -4,6 +4,7 @@ import 'package:car_rent/widgets/app_icon.dart';
 import 'package:car_rent/widgets/app_text.dart';
 import 'package:car_rent/widgets/car_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class CarRent extends StatefulWidget {
@@ -98,14 +99,12 @@ class _CarRentState extends State<CarRent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
+        leading: AppIcon(
+          icon: Icons.arrow_back,
           onTap: () {
             Get.back();
           },
-          child: const AppIcon(
-            icon: Icons.arrow_back,
-            size: 20,
-          ),
+          size: 20,
         ),
       ),
       body: Column(
@@ -175,24 +174,37 @@ class _CarRentState extends State<CarRent> {
                 left: 20.0,
               ),
               child: Row(
-                children: bmw.map(
-                  (e) {
-                    return CarCard(
-                      onTap: () {
-                        // Get.to(
-                        //   () => CarRentDetails(
-                        //     details: e,
-                        //   ),
-                        // );
-                        _navigateWithFade(context, e);
+                children: bmw
+                    .map(
+                      (e) {
+                        return CarCard(
+                          onTap: () {
+                            // Get.to(
+                            //   () => CarRentDetails(
+                            //     details: e,
+                            //   ),
+                            // );
+                            _navigateWithFade(context, e);
+                          },
+                          image: e['image'],
+                          rating: e['rating'],
+                          name: e['name'],
+                          price: e['rate'],
+                        );
                       },
-                      image: e['image'],
-                      rating: e['rating'],
-                      name: e['name'],
-                      price: e['rate'],
-                    );
-                  },
-                ).toList(),
+                    )
+                    .toList()
+                    .animate(interval: 300.ms, effects: [
+                      const SlideEffect(
+                        begin: Offset(1, 0),
+                        end: Offset(0, 0),
+                        curve: Curves.fastLinearToSlowEaseIn,
+                        duration: Duration(
+                          milliseconds: 1200,
+                        ),
+                      )
+                    ])
+                    .fade(),
               ),
             ),
           ),
@@ -236,24 +248,37 @@ class _CarRentState extends State<CarRent> {
             child: Padding(
               padding: const EdgeInsets.only(left: 20.0),
               child: Row(
-                children: audi.map(
-                  (e) {
-                    return CarCard(
-                      onTap: () {
-                        // Get.to(
-                        //   () => CarRentDetails(
-                        //     details: e,
-                        //   ),
-                        // );
-                        _navigateWithFade(context, e);
+                children: audi
+                    .map(
+                      (e) {
+                        return CarCard(
+                          onTap: () {
+                            // Get.to(
+                            //   () => CarRentDetails(
+                            //     details: e,
+                            //   ),
+                            // );
+                            _navigateWithFade(context, e);
+                          },
+                          image: e['image'],
+                          rating: e['rating'],
+                          name: e['name'],
+                          price: e['rate'],
+                        );
                       },
-                      image: e['image'],
-                      rating: e['rating'],
-                      name: e['name'],
-                      price: e['rate'],
-                    );
-                  },
-                ).toList(),
+                    )
+                    .toList()
+                    .animate(interval: 300.ms, effects: [
+                      const SlideEffect(
+                        begin: Offset(1, 0),
+                        end: Offset(0, 0),
+                        curve: Curves.fastLinearToSlowEaseIn,
+                        duration: Duration(
+                          milliseconds: 1200,
+                        ),
+                      )
+                    ])
+                    .fade(),
               ),
             ),
           ),
