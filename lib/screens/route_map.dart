@@ -13,6 +13,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 // import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
@@ -31,7 +32,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   double desLong = 7.584372460842132;
   double distanceKm = 0;
   String distanceDuration = '';
-  double currentZoom = 15.0;
+  String arriveTime = '';
+  double currentZoom = 12.0;
   String currentAddress = '';
   String destinationAddress = '';
 
@@ -69,6 +71,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   void updateDestination() async {
     Location location = Location();
 
+    // distanceDuration = '';
+
     location.onLocationChanged.listen((e) async {
       currentLocation = e;
 
@@ -82,19 +86,19 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
 
       final distKm =
           await GoogleMapsMethods.getDistance(lat, long, desLat, desLong);
+      print(
+          'gpt res  other res $distKm   langs==== $lat, $long, $desLat, $desLong, destination=> $destAddress current:==> $currentAddress');
 
       final getMinutes =
           await GoogleMapsMethods.getTiming(currentAddress, destAddress);
 
-      // print('get minutes $getMinutes');
+      print('get minutes $getMinutes');
 
-      // print(
-      // 'gpt res $timing other res $distKm   langs==== $lat, $long, $desLat, $desLong, $destAddress $currentAddress');
       setState(() {
         destinationAddress = destAddress;
         distanceKm = distKm;
         isSetAddress = true;
-        distanceDuration = getMinutes;
+        // distanceDuration = getMinutes;
       });
 
       setState(() {});
@@ -140,6 +144,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   }
 
   void getPolyPoints() async {
+    distanceDuration = '';
     polylineCoordinates.clear();
     Location location = Location();
     setState(() {});
@@ -166,6 +171,29 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
           // wayPoints: [PolylineWayPoint(location: "Sabo, Yaba Lagos Nigeria")],
         ),
       );
+      print(
+          'poly responsse ${polylineResult.durationTexts} ${polylineResult.durationValues}');
+
+      // Example duration string
+      String duration = polylineResult.durationTexts![0];
+
+      // Parse the duration string to extract the number of minutes
+      int minutesToAdd = int.parse(duration.split(' ')[0]);
+
+      // Get the current time
+      DateTime now = DateTime.now();
+
+      // Add the parsed minutes to the current time
+      DateTime arrivalTime = now.add(Duration(minutes: minutesToAdd));
+
+      // Format the arrival time (optional, for better readability)
+      // String formattedArrivalTime =
+      //     DateFormat('yyyy-MM-dd – kk:mm').format(arrivalTime);
+      String formattedArrivalTime = DateFormat('kk:mm').format(arrivalTime);
+
+      print('Current time: ${DateFormat('kk:mm').format(now)}');
+      print('Duration: $duration');
+      print('Arrival time: $formattedArrivalTime');
 
       if (polylineResult.points.isNotEmpty) {
         for (var point in polylineResult.points) {
@@ -173,7 +201,10 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             LatLng(point.latitude, point.longitude),
           );
         }
-        setState(() {});
+        setState(() {
+          distanceDuration = polylineResult.durationTexts![0];
+          arriveTime = formattedArrivalTime;
+        });
       } else {}
     });
   }
@@ -388,7 +419,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
               ),
 
             // show address and distance
-            if (isSetAddress)
+            if (!letsGo)
               Positioned(
                 left: 0,
                 right: 0,
@@ -439,7 +470,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                       color: Colors.black.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(9),
                                     ),
-                                    width: context.width * 0.6,
+                                    width: context.width * 0.5,
                                     child: Row(
                                       children: [
                                         const AppIcon(
@@ -449,7 +480,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                         ),
                                         AppText(
                                           text:
-                                              '  $distanceDuration by car   -   ${distanceKm == 0 ? '' : distanceKm.toStringAsFixed(1)} km',
+                                              '  ${distanceDuration == '' ? '...' : distanceDuration}  -   ${distanceKm == 0 ? '' : distanceKm.toStringAsFixed(1)} km',
                                           color: Colors.black,
                                           fontSize: 14,
                                           isBold: true,
@@ -469,6 +500,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                     letsGo = true;
                                     isSetAddress = false;
                                   });
+                                  zoomIn();
                                 },
                               ),
                             ),
@@ -511,17 +543,17 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                               // const SizedBox(
                               //   height: 5,
                               // ),
-                              const Column(
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   AppText(
-                                    text: ' 10:00',
+                                    text: arriveTime == '' ? '...' : arriveTime,
                                     color: Colors.black,
                                     fontSize: 14,
                                     isBold: true,
                                   ),
-                                  AppText(
-                                    text: 'Arival',
+                                  const AppText(
+                                    text: 'Arrival',
                                     color: Colors.black,
                                   ),
                                 ],
@@ -564,11 +596,13 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                           child: AppButton(
                             color: Colors.grey[350],
                             text: 'Cancel',
+                            icon: Icons.close_rounded,
                             onTap: () {
-                              setState(() {
-                                letsGo = false;
-                                isSetAddress = true;
-                              });
+                              Get.close(3);
+                              // setState(() {
+                              //   letsGo = false;
+                              //   isSetAddress = true;
+                              // });
                             },
                           ),
                         ),

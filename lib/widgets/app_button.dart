@@ -8,12 +8,15 @@ class AppButton extends StatelessWidget {
   final String text;
   final Color? color;
   final bool isIcon;
-  const AppButton(
-      {super.key,
-      this.onTap,
-      required this.text,
-      this.color,
-      this.isIcon = true});
+  final IconData? icon;
+  const AppButton({
+    super.key,
+    this.onTap,
+    required this.text,
+    this.color,
+    this.isIcon = true,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +45,8 @@ class AppButton extends StatelessWidget {
                 width: 10,
               ),
               if (isIcon)
-                const AppIcon(
-                  icon: Icons.arrow_outward_rounded,
+                AppIcon(
+                  icon: icon ?? Icons.arrow_outward_rounded,
                   color: Colors.black,
                   size: 18,
                 ),
