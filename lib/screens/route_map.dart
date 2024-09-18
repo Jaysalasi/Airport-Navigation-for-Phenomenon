@@ -30,8 +30,14 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   double desLat = 8.996140076758163;
   double desLong = 7.584372460842132;
   double distanceKm = 0;
+  String distanceDuration = '';
   double currentZoom = 15.0;
+  String currentAddress = '';
   String destinationAddress = '';
+
+  bool letsGo = false;
+  bool isSetAddress = false;
+
   // Position? currentUserPosition;
   Set<Marker> markers = {};
 
@@ -76,9 +82,19 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
 
       final distKm =
           await GoogleMapsMethods.getDistance(lat, long, desLat, desLong);
+
+      final getMinutes =
+          await GoogleMapsMethods.getTiming(currentAddress, destAddress);
+
+      // print('get minutes $getMinutes');
+
+      // print(
+      // 'gpt res $timing other res $distKm   langs==== $lat, $long, $desLat, $desLong, $destAddress $currentAddress');
       setState(() {
         destinationAddress = destAddress;
         distanceKm = distKm;
+        isSetAddress = true;
+        distanceDuration = getMinutes;
       });
 
       setState(() {});
@@ -107,13 +123,15 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
           ),
         ),
       );
-      await GoogleMapsMethods.convertGeographicCoordinatesToAddress(
-          e.latitude!,
-          e.longitude!,
-          'pickup',
-          // ignore: use_build_context_synchronously
-          context);
+      final myLocation =
+          await GoogleMapsMethods.convertGeographicCoordinatesToAddress(
+              e.latitude!,
+              e.longitude!,
+              'pickup',
+              // ignore: use_build_context_synchronously
+              context);
       setState(() {
+        currentAddress = myLocation;
         lat = e.latitude!;
         long = e.longitude!;
       });
@@ -273,68 +291,34 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                       );
                     },
                   ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              // bottom: 0,
-              child: FadeIn(
-                child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const AppText(
-                                text: 'A. Your location',
-                                color: Colors.black,
-                                isBold: true,
-                                fontSize: 14,
-                              ),
-                              SizedBox(
-                                width: context.width * 0.6,
-                                child: AppText(
-                                  text:
-                                      '${Provider.of<AppInfo>(context, listen: true).pickupLocation == null ? 'Loading...' : Provider.of<AppInfo>(context, listen: false).pickupLocation?.placeName}',
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                            height: 1,
-                            width: context.width * 0.6,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Get.to(() => const DestinationPage());
-                            },
-                            child: Column(
+            if (!letsGo)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                // bottom: 0,
+                child: FadeIn(
+                  animate: !letsGo,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(
-                                  height: 5,
-                                ),
                                 const AppText(
-                                  text: 'B. Destination',
+                                  text: 'A. Your location',
                                   color: Colors.black,
                                   isBold: true,
                                   fontSize: 14,
@@ -342,37 +326,76 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                 SizedBox(
                                   width: context.width * 0.6,
                                   child: AppText(
-                                    text: destinationAddress,
+                                    text:
+                                        '${Provider.of<AppInfo>(context, listen: true).pickupLocation == null ? 'Loading...' : Provider.of<AppInfo>(context, listen: false).pickupLocation?.placeName}',
                                     color: Colors.black,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                            color: Colors.black, shape: BoxShape.circle),
-                        child: const AppIcon(
-                          icon: Icons.swap_vert_rounded,
-                          color: Colors.white,
-                          size: 20.0,
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Container(
+                              height: 1,
+                              width: context.width * 0.6,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.2),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Get.to(() => const DestinationPage());
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  const AppText(
+                                    text: 'B. Destination',
+                                    color: Colors.black,
+                                    isBold: true,
+                                    fontSize: 14,
+                                  ),
+                                  SizedBox(
+                                    width: context.width * 0.6,
+                                    child: AppText(
+                                      text: destinationAddress,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    ],
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                              color: Colors.black, shape: BoxShape.circle),
+                          child: const AppIcon(
+                            icon: Icons.swap_vert_rounded,
+                            color: Colors.white,
+                            size: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (destinationAddress != '')
+
+            // show address and distance
+            if (isSetAddress)
               Positioned(
                 left: 0,
                 right: 0,
                 // top: 0,
                 bottom: context.height * 0.1,
                 child: FadeIn(
+                  animate: isSetAddress,
                   child: Container(
                     width: context.width,
                     margin: const EdgeInsets.symmetric(
@@ -388,16 +411,6 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // const SizedBox(
-                            //   height: 5,
-                            // ),
-                            // Container(
-                            //   height: 1,
-                            //   width: context.width * 0.6,
-                            //   decoration: BoxDecoration(
-                            //     color: Colors.black.withOpacity(0.2),
-                            //   ),
-                            // ),
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 20, horizontal: 20),
@@ -408,12 +421,6 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                   const SizedBox(
                                     height: 5,
                                   ),
-                                  // const AppText(
-                                  //   text: 'B. Destination',
-                                  //   color: Colors.black,
-                                  //   isBold: true,
-                                  //   fontSize: 14,
-                                  // ),
                                   SizedBox(
                                     width: context.width * 0.6,
                                     child: AppText(
@@ -423,11 +430,14 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                       isBold: true,
                                     ),
                                   ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
                                   Container(
-                                    padding: EdgeInsets.all(5),
+                                    padding: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(5),
+                                      borderRadius: BorderRadius.circular(9),
                                     ),
                                     width: context.width * 0.6,
                                     child: Row(
@@ -438,7 +448,8 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                           color: Colors.black,
                                         ),
                                         AppText(
-                                          text: distanceKm.toString(),
+                                          text:
+                                              '  $distanceDuration by car   -   ${distanceKm == 0 ? '' : distanceKm.toStringAsFixed(1)} km',
                                           color: Colors.black,
                                           fontSize: 14,
                                           isBold: true,
@@ -449,31 +460,125 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                                 ],
                               ),
                             ),
-
                             SizedBox(
                               width: context.width * 0.9,
                               child: AppButton(
                                 text: 'Let\'s go',
-                                onTap: () {},
+                                onTap: () {
+                                  setState(() {
+                                    letsGo = true;
+                                    isSetAddress = false;
+                                  });
+                                },
                               ),
                             ),
                           ],
                         ),
-                        // Container(
-                        //   padding: const EdgeInsets.all(3),
-                        //   decoration: const BoxDecoration(
-                        //       color: Colors.black, shape: BoxShape.circle),
-                        //   child: const AppIcon(
-                        //     icon: Icons.swap_vert_rounded,
-                        //     color: Colors.white,
-                        //     size: 20.0,
-                        //   ),
-                        // )
                       ],
                     ),
                   ),
                 ),
               ),
+
+            //  cancel trip
+            if (letsGo)
+              Positioned(
+                left: 0,
+                right: 0,
+                // top: 0,
+                bottom: context.height * 0.1,
+                child: FadeIn(
+                  // manualTrigger: letsGo,
+                  animate: letsGo,
+                  child: Container(
+                    width: context.width,
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
+                          // padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // const SizedBox(
+                              //   height: 5,
+                              // ),
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AppText(
+                                    text: ' 10:00',
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    isBold: true,
+                                  ),
+                                  AppText(
+                                    text: 'Arival',
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AppText(
+                                    text:
+                                        '${distanceKm == 0 ? '' : distanceKm.toStringAsFixed(1)} km',
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    isBold: true,
+                                  ),
+                                  const AppText(
+                                    text: 'Distance',
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  AppText(
+                                    text: '$distanceDuration ',
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    isBold: true,
+                                  ),
+                                  const AppText(
+                                    text: 'On the way',
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: context.width * 0.9,
+                          child: AppButton(
+                            color: Colors.grey[350],
+                            text: 'Cancel',
+                            onTap: () {
+                              setState(() {
+                                letsGo = false;
+                                isSetAddress = true;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+            // side icons
             Positioned(
               bottom: context.height * 0.4,
               right: 12,

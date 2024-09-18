@@ -55,6 +55,33 @@ class GoogleMapsMethods {
     return readableAddress;
   }
 
+  static Future<String> getTiming(
+    String initAddress,
+    String destAddress,
+  ) async {
+    String readableAddress = '';
+    String distanceMatrixUrl =
+        'https://maps.googleapis.com/maps/api/distancematrix/json?destinations=$destAddress&origins=$initAddress&mode=driving&units=imperial&key=${AppConstants.googleApiKey}';
+
+    var response = await sendReqToAPI(distanceMatrixUrl);
+
+    if (response != 'error') {
+      readableAddress = response['rows'][0]['elements'][0]['duration']['text'];
+      // print('getsss $readableAddress');
+      // Elements elements = Elements();
+
+      // elements.duration?.text = response['results'][0]['place_id'];
+
+      // if (type != 'destination') {
+      // Provider.of<AppInfo>(context, listen: false)
+      //     .updatePickupLocation(addressModel);
+      // }
+    } else {
+      return 'error';
+    }
+    return readableAddress;
+  }
+
   static Future<double> getDistance(
       double pLat, double pLng, double dLat, double dLng) async {
     double distance = 0;
@@ -75,7 +102,7 @@ class GoogleMapsMethods {
   static Future<String> convertAddressToCoordindates(
     String address,
   ) async {
-    String readableAddress = '';
+    // String readableAddress = '';
     String geoCodingUrl =
         'https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=${AppConstants.googleApiKey}';
 
